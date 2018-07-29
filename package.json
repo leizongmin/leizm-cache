@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "description": "基于Redis的缓存管理器",
   "main": "dist/lib/index.js",
+  "typings": "dist/lib/index.d.ts",
+  "files": [
+    "dist/lib"
+  ],
   "scripts": {
-    "test": "mocha --require ts-node/register --exit \"src/test/**/*.spec.ts\""
+    "test": "mocha --require ts-node/register --exit \"src/test/**/*.spec.ts\"",
+    "compile": "rm -rf dist && tsc",
+    "prepublish": "npm run compile"
   },
   "repository": {
     "type": "git",
