@@ -1,0 +1,36 @@
+{
+  "name": "@leizm/cache",
+  "version": "1.0.0",
+  "description": "基于Redis的缓存管理器",
+  "main": "dist/lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leizongmin/leizm-cache.git"
+  },
+  "keywords": [
+    "cache",
+    "redis"
+  ],
+  "author": "Zongmin Lei <leizongmin@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/leizongmin/leizm-cache/issues"
+  },
+  "homepage": "https://github.com/leizongmin/leizm-cache#readme",
+  "devDependencies": {
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.0",
+    "typescript": "^2.9.2"
+  },
+  "dependencies": {
+    "@types/ioredis": "^3.2.13",
+    "@types/node": "^10.5.4",
+    "ioredis": "^3.2.2"
+  }
+}
