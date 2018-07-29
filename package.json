@@ -4,7 +4,7 @@
   "description": "基于Redis的缓存管理器",
   "main": "dist/lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --require ts-node/register --exit \"src/test/**/*.spec.ts\""
   },
   "repository": {
     "type": "git",

@@ -4,7 +4,7 @@
  * @author Zongmin Lei <leizongmin@gmail.com>
  */
 
-import Redis from "ioredis";
+import * as Redis from "ioredis";
 
 export interface CacheOptions {
   /** Redis连接信息 */
@@ -20,14 +20,14 @@ export type CacheData = any;
 export type QueryOriginalFunction = (key: string) => Promise<CacheData>;
 
 interface AsyncTask {
-  resolve(a: any);
-  reject(a: any);
+  resolve(a: any): void;
+  reject(a: any): void;
   wait(): Promise<any>;
 }
 
 export class Cache {
   public readonly redis: Redis.Redis;
-  protected readonly pendingTask: Map<string, AsyncTask[]>;
+  protected readonly pendingTask: Map<string, AsyncTask[]> = new Map();
 
   constructor(public readonly options: CacheOptions) {
     this.redis = new Redis(options.redis);
@@ -62,7 +62,7 @@ export class Cache {
 
     // 需要从数据源查询
     if (this.pendingTask.has(key)) {
-      const list = this.pendingTask.get(key);
+      const list = this.pendingTask.get(key)!;
       const task = this.createAsyncTask();
       list.push(task);
       this.pendingTask.set(key, list);
@@ -73,12 +73,12 @@ export class Cache {
         this.pendingTask.set(key, []);
         const data = await queryOriginal(key);
         await this.set(key, data, ttl);
-        const list = this.pendingTask.get(key);
+        const list = this.pendingTask.get(key)!;
         this.pendingTask.delete(key);
         list.forEach(task => task.resolve(data));
         return data;
       } catch (err) {
-        const list = this.pendingTask.get(key);
+        const list = this.pendingTask.get(key)!;
         this.pendingTask.delete(key);
         list.forEach(task => task.reject(err));
         throw err;
@@ -105,13 +105,19 @@ export class Cache {
    */
   public define(
     key: string,
-    queryOriginal?: QueryOriginalFunction,
+    queryOriginal: QueryOriginalFunction,
     ttl: number = this.options.ttl,
   ): (() => Promise<CacheData>) {
-    const fn = async () => {
+    return async () => {
       return this.get(key, queryOriginal, ttl);
     };
-    (fn as any).name = `queryCache:${key}`;
-    return fn;
+  }
+
+  /**
+   * 销毁
+   */
+  public destroy() {
+    this.redis.disconnect();
+    this.pendingTask.clear();
   }
 }
