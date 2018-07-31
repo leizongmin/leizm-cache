@@ -17,12 +17,16 @@ export interface CacheOptions {
 export type CacheData = any;
 
 /** 从数据源查询数据的函数 */
-export type QueryOriginalFunction = (key: string) => Promise<CacheData>;
+export type QueryOriginalFunction = (ctx: QueryOriginalContext) => Promise<CacheData>;
 
 interface AsyncTask {
   resolve(a: any): void;
   reject(a: any): void;
   wait(): Promise<any>;
+}
+
+export class QueryOriginalContext {
+  constructor(public readonly key: string, public ttl: number) {}
 }
 
 export class Cache {
@@ -61,7 +65,10 @@ export class Cache {
     if (!queryOriginal) return;
 
     // 需要从数据源查询
+    const ctx = new QueryOriginalContext(key, ttl);
+
     if (this.pendingTask.has(key)) {
+      // 有并发的查询任务
       const list = this.pendingTask.get(key)!;
       const task = this.createAsyncTask();
       list.push(task);
@@ -69,10 +76,11 @@ export class Cache {
       const data = await task.wait();
       return data;
     } else {
+      // 从数据源查询
       try {
         this.pendingTask.set(key, []);
-        const data = await queryOriginal(key);
-        await this.set(key, data, ttl);
+        const data = await queryOriginal(ctx);
+        await this.set(key, data, ctx.ttl);
         const list = this.pendingTask.get(key)!;
         this.pendingTask.delete(key);
         list.forEach(task => task.resolve(data));

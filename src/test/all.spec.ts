@@ -23,7 +23,8 @@ function sleep(ms = 0) {
 
 describe("测试 @leizm/cache", function() {
   it("基本测试：get/set/delete", async function() {
-    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl: 3 });
+    const ttl = 3;
+    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl });
     {
       const key = getRandomKey();
       const ret = await cache.get(key);
@@ -44,8 +45,9 @@ describe("测试 @leizm/cache", function() {
     {
       const key = getRandomKey();
       const data = getRandomData();
-      const ret = await cache.get(key, async k => {
-        expect(k).to.equal(key);
+      const ret = await cache.get(key, async ctx => {
+        expect(ctx.key).to.equal(key);
+        expect(ctx.ttl).to.equal(ttl);
         return data;
       });
       expect(ret).to.deep.equal(data);
@@ -54,7 +56,8 @@ describe("测试 @leizm/cache", function() {
   });
 
   it("并发情况，只会从数据源查询一次", async function() {
-    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl: 3 });
+    const ttl = 3;
+    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl });
     const key = getRandomKey();
     const data = getRandomData();
     const list = [];
@@ -62,9 +65,10 @@ describe("测试 @leizm/cache", function() {
     let counter = 0;
     for (let i = 0; i < size; i++) {
       list.push(
-        cache.get(key, async k => {
+        cache.get(key, async ctx => {
           counter++;
-          expect(k).to.equal(key);
+          expect(ctx.key).to.equal(key);
+          expect(ctx.ttl).to.equal(ttl);
           return data;
         }),
       );
@@ -79,11 +83,13 @@ describe("测试 @leizm/cache", function() {
   });
 
   it("define() 定义自动从数据源或缓存中查询数据的方法", async function() {
-    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl: 3 });
+    const ttl = 3;
+    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl });
     const key = getRandomKey();
     const data = getRandomData();
-    const getData = cache.define(key, async k => {
-      expect(k).to.equal(key);
+    const getData = cache.define(key, async ctx => {
+      expect(ctx.key).to.equal(key);
+      expect(ctx.ttl).to.equal(ttl);
       return data;
     });
     for (let i = 0; i < 10; i++) {
@@ -95,12 +101,14 @@ describe("测试 @leizm/cache", function() {
 
   it("默认 ttl 与自定义 ttl", async function() {
     this.timeout(20000);
-    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl: 2 });
+    const ttl = 2;
+    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl });
     {
       const key = getRandomKey();
       let counter = 0;
-      const getData = cache.define(key, async k => {
-        expect(k).to.equal(key);
+      const getData = cache.define(key, async ctx => {
+        expect(ctx.key).to.equal(key);
+        expect(ctx.ttl).to.equal(ttl);
         counter++;
         return counter;
       });
@@ -112,15 +120,15 @@ describe("测试 @leizm/cache", function() {
       await sleep(2000);
       expect(await getData()).to.equal(2);
       expect(await getData()).to.equal(2);
-      expect(await getData()).to.equal(2);
     }
     {
       const key = getRandomKey();
       let counter = 0;
       const getData = cache.define(
         key,
-        async k => {
-          expect(k).to.equal(key);
+        async ctx => {
+          expect(ctx.key).to.equal(key);
+          expect(ctx.ttl).to.equal(5);
           counter++;
           return counter;
         },
@@ -134,9 +142,33 @@ describe("测试 @leizm/cache", function() {
       await sleep(2000);
       expect(await getData()).to.equal(1);
       expect(await getData()).to.equal(1);
-      expect(await getData()).to.equal(1);
       await sleep(5000);
       expect(await getData()).to.equal(2);
+      expect(await getData()).to.equal(2);
+    }
+    {
+      const key = getRandomKey();
+      let counter = 0;
+      const getData = cache.define(
+        key,
+        async ctx => {
+          expect(ctx.key).to.equal(key);
+          expect(ctx.ttl).to.equal(3);
+          ctx.ttl = 5;
+          counter++;
+          return counter;
+        },
+        3,
+      );
+      expect(await getData()).to.equal(1);
+      expect(await getData()).to.equal(1);
+      await sleep(500);
+      expect(await getData()).to.equal(1);
+      expect(await getData()).to.equal(1);
+      await sleep(3000);
+      expect(await getData()).to.equal(1);
+      expect(await getData()).to.equal(1);
+      await sleep(3000);
       expect(await getData()).to.equal(2);
       expect(await getData()).to.equal(2);
     }

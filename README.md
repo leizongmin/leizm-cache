@@ -50,13 +50,13 @@ const cache = new Cache({
 });
 
 // 查询缓存
-const data = await cache.get("key_name", async function(key) {
+const data = await cache.get("key_name", async function(ctx) {
   // 如果没有缓存数据，则会调用此方法查询数据
   return "any data";
 });
 
 // 定义查询缓存的方法
-const getData = cache.define("key_name", async function(key) {
+const getData = cache.define("key_name", async function(ctx) {
   // 如果没有缓存数据，则会调用此方法查询数据
   return "any data";
 });
@@ -71,6 +71,11 @@ const data = await getData();
 - `cache.set(key, data, ttl?)` 手动设置缓存数据，如果没指定 `ttl` 则使用全局的 `ttl`
 - `cache.delete(key)` 手动删除缓存数据
 - `cache.destroy()` 销毁缓存管理器
+
+其中 `queryOriginal` 的格式为：`function queryOriginal(ctx) { }`，`ctx`  包含以下属性：
+
+- `key` 当前要缓存的键
+- `ttl` 当前缓存时间（秒），通过修改此值可以动态改变 `ttl`
 
 ## License
 
