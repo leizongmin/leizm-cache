@@ -99,6 +99,60 @@ describe("测试 @leizm/cache", function() {
     cache.destroy();
   });
 
+  it("查询数据函数发生异常", async function() {
+    this.timeout(10000);
+    const ttl = 3;
+    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl });
+    {
+      const key = getRandomKey();
+      try {
+        await cache.get(key, async ctx => {
+          await sleep(Math.random() * 1000);
+          throw new Error("test1");
+        });
+        throw new Error("不应该执行到此处");
+      } catch (err) {
+        expect(err.message).to.equal("test1");
+      }
+    }
+    {
+      const key = getRandomKey();
+      const getData = cache.define(key, async ctx => {
+        await sleep(Math.random() * 1000);
+        throw new Error("test2");
+      });
+      try {
+        await getData();
+        throw new Error("不应该执行到此处");
+      } catch (err) {
+        expect(err.message).to.equal("test2");
+      }
+    }
+    {
+      const key = getRandomKey();
+      let counter = 0;
+      const getData = cache.define(key, async ctx => {
+        counter++;
+        await sleep(Math.random() * 100);
+        throw new Error("test3");
+      });
+      const list = [];
+      const size = 10;
+      for (let i = 0; i < size; i++) {
+        list.push(getData());
+      }
+      try {
+        await Promise.all(list);
+        throw new Error("不应该执行到此处");
+      } catch (err) {
+        expect(err.message).to.equal("test3");
+      }
+      await sleep(Math.random() * 1000);
+      expect(counter).to.equal(1);
+    }
+    cache.destroy();
+  });
+
   it("默认 ttl 与自定义 ttl", async function() {
     this.timeout(20000);
     const ttl = 2;
