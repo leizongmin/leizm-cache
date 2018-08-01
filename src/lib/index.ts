@@ -5,12 +5,15 @@
  */
 
 import * as Redis from "ioredis";
+import { SimpleInMemoryRedis, SimpleInMemoryRedisOptions } from "./memory";
 
 export interface CacheOptions {
-  /** Redis连接信息 */
-  redis: Redis.RedisOptions;
   /** 缓存时间，单位：秒 */
   ttl: number;
+  /** Redis连接信息 */
+  redis?: Redis.RedisOptions;
+  /** 内存存储引擎参数 */
+  memory?: SimpleInMemoryRedisOptions;
   /** 数据编码器 */
   encoder?: DataEncoder;
   /** 数据解码器 */
@@ -70,17 +73,28 @@ export class AsyncTask<T = any> {
   }
 }
 
+export interface RedisStore {
+  get(key: string): Promise<string>;
+  setex(key: string, ttl: number, data: string): Promise<void>;
+  del(key: string): Promise<void>;
+  disconnect(): void;
+}
+
 /**
  * 缓存管理器
  */
 export class Cache {
-  protected readonly redis: Redis.Redis;
+  protected readonly redis: RedisStore;
   protected readonly pendingTask: Map<string, AsyncTask[]> = new Map();
   protected readonly encode: DataEncoder;
   protected readonly decode: DataDecoder;
 
   constructor(public readonly options: CacheOptions) {
-    this.redis = new Redis(options.redis);
+    if (options.redis) {
+      this.redis = new Redis(options.redis) as any;
+    } else {
+      this.redis = new SimpleInMemoryRedis({ interval: 500, ...options.memory });
+    }
     this.encode = options.encoder || defaultEncoder;
     this.decode = options.decoder || defaultDecoder;
   }
