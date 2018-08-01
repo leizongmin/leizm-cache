@@ -176,7 +176,25 @@ function generateTests(title: string, options: any) {
 
     it("使用 decodeBuffer=true", async function() {
       const ttl = 2;
-      const encoder = (data: any) => "1" + data;
+      const cache = new Cache({ ...options, ttl, decodeBuffer: true });
+      const key = getRandomKey();
+      let counter = 0;
+      const getData = cache.define(key, async ctx => {
+        expect(ctx.key).to.equal(key);
+        expect(ctx.ttl).to.equal(ttl);
+        counter++;
+        return "hello";
+      });
+      expect(await getData()).to.equal("hello");
+      expect(await getData()).to.equal("hello");
+      expect(await getData()).to.equal("hello");
+      expect(counter).to.equal(1);
+      cache.destroy();
+    });
+
+    it("使用 decodeBuffer=true 自定义 encoder & decoder", async function() {
+      const ttl = 2;
+      const encoder = (data: any) => Buffer.concat([Buffer.from("1"), Buffer.from(data)]);
       const decoder = (data: string | Buffer) => data + "2";
       const cache = new Cache({ ...options, ttl, encoder, decoder, decodeBuffer: true });
       const key = getRandomKey();
@@ -185,7 +203,7 @@ function generateTests(title: string, options: any) {
         expect(ctx.key).to.equal(key);
         expect(ctx.ttl).to.equal(ttl);
         counter++;
-        return "hello";
+        return Buffer.from("hello");
       });
       expect(await getData()).to.equal("1hello2");
       expect(await getData()).to.equal("1hello2");

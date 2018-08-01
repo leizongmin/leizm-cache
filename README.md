@@ -68,17 +68,18 @@ const data = await getData();
 
 - `new Cache({ ttl, redis?, encoder?, decoder? })` 创建缓存管理器实例：
   - `ttl` 默认缓存时间，秒
-  - `redis` Redis连接配置，参考 [ioredis](https://www.npmjs.com/package/ioredis) 模块，**如果不提供此参数，则会默认使用内存存储**
+  - `redis` Redis 连接配置，参考 [ioredis](https://www.npmjs.com/package/ioredis) 模块，**如果不提供此参数，则会默认使用内存存储**
   - `memory` 内存存储引擎配置 **实验性**
-  - `encoder` 数据编码器，格式：`(data: any) => string | Buffer`，默认为 `JSON.stringify(data)`（**由于JSON解析器在数据长度大的时候性能较差，为提高性能需要定义自己的数据编码方式**）
+  - `encoder` 数据编码器，格式：`(data: any) => string | Buffer`，默认为 `JSON.stringify(data)`（**由于 JSON 解析器在数据长度大的时候性能较差，为提高性能需要定义自己的数据编码方式**）
   - `decoder` 数据解码器，格式：`(data: string | Buffer) => any`，默认为 `JSON.parse(data.toString())`
+  - `decodeBuffer` 传递给 `decoder` 的数据是否使用 Buffer 类型（默认为 string），**当使用自定义 decoder 时，为提高性能可考虑将此参数设置为 true（比如直接存储 gzip 数据流）**
 - `cache.get(key, queryOriginal?, ttl?)` 查询缓存，如果缓存不存在则先使用 `queryOriginal` 查询数据（如果没指定该参数则返回 `undefined`），如果没指定 `ttl` 则使用全局的 `ttl`
 - `cache.define(key, queryOriginal, ttl?)` 定义查询缓存的方法，返回一个函数，无需传递任何参数直接调用该函数即可返回缓存数据（参数说明同上）
 - `cache.set(key, data, ttl?)` 手动设置缓存数据，如果没指定 `ttl` 则使用全局的 `ttl`
 - `cache.delete(key)` 手动删除缓存数据
 - `cache.destroy()` 销毁缓存管理器
 
-其中 `queryOriginal` 的格式为：`function queryOriginal(ctx) { }`，`ctx`  包含以下属性：
+其中 `queryOriginal` 的格式为：`function queryOriginal(ctx) { }`，`ctx` 包含以下属性：
 
 - `key` 当前要缓存的键
 - `ttl` 当前缓存时间（秒），通过修改此值可以动态改变 `ttl`
