@@ -39,16 +39,40 @@ export function defaultDecoder(data: string): any {
 /** 从数据源查询数据的函数 */
 export type QueryOriginalFunction = (ctx: QueryOriginalContext) => Promise<CacheData>;
 
-interface AsyncTask {
-  resolve(a: any): void;
-  reject(a: any): void;
-  wait(): Promise<any>;
-}
-
+/**
+ * 查询缓存函数Context
+ */
 export class QueryOriginalContext {
   constructor(public readonly key: string, public ttl: number) {}
 }
 
+/**
+ * 异步任务
+ */
+export class AsyncTask<T = any> {
+  protected $resolve?: (a: T) => void;
+  protected $reject?: (a: any) => void;
+  protected $promise: Promise<T>;
+  constructor() {
+    this.$promise = new Promise((resolve, reject) => {
+      this.$resolve = resolve;
+      this.$reject = reject;
+    });
+  }
+  public resolve(a: T) {
+    return this.$resolve!(a);
+  }
+  public reject(a: any) {
+    return this.$reject!(a);
+  }
+  public wait(): Promise<T> {
+    return this.$promise;
+  }
+}
+
+/**
+ * 缓存管理器
+ */
 export class Cache {
   protected readonly redis: Redis.Redis;
   protected readonly pendingTask: Map<string, AsyncTask[]> = new Map();
@@ -59,21 +83,6 @@ export class Cache {
     this.redis = new Redis(options.redis);
     this.encode = options.encoder || defaultEncoder;
     this.decode = options.decoder || defaultDecoder;
-  }
-
-  protected createAsyncTask(): AsyncTask {
-    const task = {
-      $reject: (a: any) => {},
-      $resolve: (a: any) => {},
-      resolve: (a: any) => task.$resolve(a),
-      reject: (a: any) => task.$reject(a),
-      wait: () =>
-        new Promise((resolve, reject) => {
-          task.$resolve = resolve;
-          task.$reject = reject;
-        }),
-    };
-    return task;
   }
 
   /**
@@ -94,7 +103,7 @@ export class Cache {
     if (this.pendingTask.has(key)) {
       // 有并发的查询任务
       const list = this.pendingTask.get(key)!;
-      const task = this.createAsyncTask();
+      const task = new AsyncTask();
       list.push(task);
       this.pendingTask.set(key, list);
       const data = await task.wait();
