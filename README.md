@@ -66,6 +66,11 @@ const data = await getData();
 
 具体接口如下：
 
+- `new Cache({ redis, ttl, encoder?, decoder? })` 创建缓存管理器实例：
+  - `redis` Redis连接配置，参考 [ioredis](https://www.npmjs.com/package/ioredis) 模块
+  - `ttl` 默认缓存时间，秒
+  - `encoder` 数据编码器，格式：`(data: any) => string`，默认为 `JSON.stringify`
+  - `decoder` 数据解码器，格式：`(data: string) => any`，默认为 `JSON.parse`
 - `cache.get(key, queryOriginal?, ttl?)` 查询缓存，如果缓存不存在则先使用 `queryOriginal` 查询数据（如果没指定该参数则返回 `undefined`），如果没指定 `ttl` 则使用全局的 `ttl`
 - `cache.define(key, queryOriginal, ttl?)` 定义查询缓存的方法，返回一个函数，无需传递任何参数直接调用该函数即可返回缓存数据（参数说明同上）
 - `cache.set(key, data, ttl?)` 手动设置缓存数据，如果没指定 `ttl` 则使用全局的 `ttl`

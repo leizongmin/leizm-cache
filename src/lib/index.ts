@@ -11,10 +11,30 @@ export interface CacheOptions {
   redis: Redis.RedisOptions;
   /** 缓存时间，单位：秒 */
   ttl: number;
+  /** 数据编码器 */
+  encoder?: DataEncoder;
+  /** 数据解码器 */
+  decoder?: DataDecoder;
 }
 
 /** 缓存数据 */
 export type CacheData = any;
+
+/** 数据编码器接口 */
+export type DataEncoder = (data: any) => string;
+
+/** 数据解码器 */
+export type DataDecoder = (data: string) => any;
+
+/** 默认数据编码器 */
+export function defaultEncoder(data: any): string {
+  return JSON.stringify(data);
+}
+
+/** 默认数据解码器 */
+export function defaultDecoder(data: string): any {
+  return JSON.parse(data);
+}
 
 /** 从数据源查询数据的函数 */
 export type QueryOriginalFunction = (ctx: QueryOriginalContext) => Promise<CacheData>;
@@ -30,11 +50,15 @@ export class QueryOriginalContext {
 }
 
 export class Cache {
-  public readonly redis: Redis.Redis;
+  protected readonly redis: Redis.Redis;
   protected readonly pendingTask: Map<string, AsyncTask[]> = new Map();
+  protected readonly encode: DataEncoder;
+  protected readonly decode: DataDecoder;
 
   constructor(public readonly options: CacheOptions) {
     this.redis = new Redis(options.redis);
+    this.encode = options.encoder || defaultEncoder;
+    this.decode = options.decoder || defaultDecoder;
   }
 
   protected createAsyncTask(): AsyncTask {
@@ -61,7 +85,7 @@ export class Cache {
     ttl: number = this.options.ttl,
   ): Promise<CacheData> {
     const current = await this.redis.get(key);
-    if (current) return JSON.parse(current);
+    if (current) return this.decode(current);
     if (!queryOriginal) return;
 
     // 需要从数据源查询
@@ -83,8 +107,10 @@ export class Cache {
         await this.set(key, data, ctx.ttl);
         const list = this.pendingTask.get(key)!;
         this.pendingTask.delete(key);
-        list.forEach(task => task.resolve(data));
-        return data;
+        // 保证返回的数据都是经过 encode 和 decode 处理的
+        const retData = this.decode(this.encode(data));
+        list.forEach(task => task.resolve(retData));
+        return retData;
       } catch (err) {
         const list = this.pendingTask.get(key)!;
         this.pendingTask.delete(key);
@@ -98,7 +124,7 @@ export class Cache {
    * 设置缓存
    */
   public async set(key: string, data: CacheData, ttl: number = this.options.ttl): Promise<void> {
-    await this.redis.setex(key, ttl, JSON.stringify(data));
+    await this.redis.setex(key, ttl, this.encode(data));
   }
 
   /**

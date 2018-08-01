@@ -153,6 +153,26 @@ describe("测试 @leizm/cache", function() {
     cache.destroy();
   });
 
+  it("自定义 encoder & decoder", async function() {
+    const ttl = 2;
+    const encoder = (data: any) => "1" + data;
+    const decoder = (data: string) => data + "2";
+    const cache = new Cache({ redis: { keyPrefix: "test:" }, ttl, encoder, decoder });
+    const key = getRandomKey();
+    let counter = 0;
+    const getData = cache.define(key, async ctx => {
+      expect(ctx.key).to.equal(key);
+      expect(ctx.ttl).to.equal(ttl);
+      counter++;
+      return "hello";
+    });
+    expect(await getData()).to.equal("1hello2");
+    expect(await getData()).to.equal("1hello2");
+    expect(await getData()).to.equal("1hello2");
+    expect(counter).to.equal(1);
+    cache.destroy();
+  });
+
   it("默认 ttl 与自定义 ttl", async function() {
     this.timeout(20000);
     const ttl = 2;
