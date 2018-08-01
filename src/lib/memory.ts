@@ -4,6 +4,8 @@
  * @author Zongmin Lei <leizongmin@gmail.com>
  */
 
+import { RedisStore } from "./common";
+
 interface DataRow {
   expire: number;
   data: Buffer;
@@ -14,7 +16,7 @@ export interface SimpleInMemoryRedisOptions {
   interval: number;
 }
 
-export class SimpleInMemoryRedis {
+export class SimpleInMemoryRedis implements RedisStore {
   protected data: Map<string, DataRow> = new Map();
   protected tid: NodeJS.Timer;
 
@@ -29,14 +31,20 @@ export class SimpleInMemoryRedis {
     }, this.options.interval);
   }
 
-  public async get(key: string): Promise<string> {
+  public async get(key: string): Promise<string | null> {
     const item = this.data.get(key);
-    if (!item) return "";
+    if (!item) return null;
     return item.data.toString();
   }
 
-  public async setex(key: string, ttl: number, data: string): Promise<void> {
-    this.data.set(key, { expire: ttl * 1000 + Date.now(), data: Buffer.from(data) });
+  public async getBuffer(key: string): Promise<Buffer | null> {
+    const item = this.data.get(key);
+    if (!item) return null;
+    return item.data;
+  }
+
+  public async setex(key: string, ttl: number, data: string | Buffer): Promise<void> {
+    this.data.set(key, { expire: ttl * 1000 + Date.now(), data: Buffer.isBuffer(data) ? data : Buffer.from(data) });
   }
 
   public async del(key: string): Promise<void> {
