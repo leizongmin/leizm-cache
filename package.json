@@ -1,6 +1,6 @@
 {
   "name": "@leizm/cache",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "基于Redis的缓存管理器",
   "main": "dist/lib/index.js",
   "typings": "dist/lib/index.d.ts",
