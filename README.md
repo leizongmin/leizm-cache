@@ -22,7 +22,7 @@
 
 # @leizm/cache
 
-基于 Redis 的缓存管理器
+高性能缓存管理器，支持 Redis、Memcached 和内存存储
 
 ## 安装
 
@@ -35,19 +35,35 @@ npm i @leizm/cache -S
 ```typescript
 import { Cache } from "@leizm/cache";
 
-// 创建实例
+// 创建实例，默认使用内存存储
 const cache = new Cache({
-  // Redis 连接配置，参考 ioredis 模块
-  redis: {
-    host: "127.0.0.1",
-    port: 6379,
-    db: 1,
-    password: "",
-    keyPredix: "CACHE:",
-  },
   // 默认缓存时间，秒
   ttl: 3600,
 });
+
+// // 使用 Redis 存储
+// const cache = new Cache({
+//   // 默认缓存时间，秒
+//   ttl: 3600,
+//   // Redis 连接配置，参考 ioredis 模块
+//   redis: {
+//     host: "127.0.0.1",
+//     port: 6379,
+//     db: 1,
+//     password: "",
+//     keyPredix: "CACHE:",
+//   },
+// });
+
+// // 使用 Memcached 存储
+// const cache = new Cache({
+//   // 默认缓存时间，秒
+//   ttl: 3600,
+//   // Memcached 连接配置，参考 memjs 模块
+//   memcached: {
+//     server: "127.0.0.1:11211",
+//   },
+// });
 
 // 查询缓存
 const data = await cache.get("key_name", async function(ctx) {

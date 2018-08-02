@@ -1,7 +1,7 @@
 {
   "name": "@leizm/cache",
   "version": "1.4.0",
-  "description": "基于Redis的缓存管理器",
+  "description": "高性能缓存管理器，支持 Redis、Memcached 和内存存储",
   "main": "dist/lib/index.js",
   "typings": "dist/lib/index.d.ts",
   "files": [
