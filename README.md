@@ -22,6 +22,9 @@
 
 # @leizm/cache
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/leizongmin/leizm-cache.svg)](https://greenkeeper.io/)
+[![DeepScan grade](https://deepscan.io/api/projects/2920/branches/22356/badge/grade.svg)](https://deepscan.io/dashboard#view=project&pid=2920&bid=22356)
+
 高性能缓存管理器，支持 Redis、Memcached 和内存存储
 
 ## 安装
