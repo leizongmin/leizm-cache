@@ -28,24 +28,6 @@ async function main() {
       });
     }
     {
-      const get = s1.define(key + "str2", async () => str2);
-      await get();
-      bench.add(title + " - get(str2): 64K", done => {
-        get()
-          .then(() => done())
-          .catch(done);
-      });
-    }
-    {
-      const get = s1.define(key + "str3", async () => str3);
-      await get();
-      bench.add(title + " - get(str3): 512K", done => {
-        get()
-          .then(() => done())
-          .catch(done);
-      });
-    }
-    {
       const get = s2.define(key + "buf1", async () => buf1);
       await get();
       bench.add(title + " - get(buf1): 1K", done => {
@@ -55,9 +37,27 @@ async function main() {
       });
     }
     {
+      const get = s1.define(key + "str2", async () => str2);
+      await get();
+      bench.add(title + " - get(str2): 64K", done => {
+        get()
+          .then(() => done())
+          .catch(done);
+      });
+    }
+    {
       const get = s2.define(key + "buf2", async () => buf2);
       await get();
       bench.add(title + " - get(buf2): 64K", done => {
+        get()
+          .then(() => done())
+          .catch(done);
+      });
+    }
+    {
+      const get = s1.define(key + "str3", async () => str3);
+      await get();
+      bench.add(title + " - get(str3): 512K", done => {
         get()
           .then(() => done())
           .catch(done);
