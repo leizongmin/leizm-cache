@@ -1,4 +1,5 @@
 const { Cache } = require("../dist/lib");
+const os = require("os");
 
 class Benchmark {
   constructor(title, time = 2000, concurrent = 100) {
@@ -6,6 +7,30 @@ class Benchmark {
     this.time = time;
     this.concurrent = concurrent;
     this.list = [];
+  }
+  platformInfo() {
+    const lines = [];
+    lines.push("Platform info:");
+    lines.push("- " + os.type() + " " + os.release() + " " + os.arch());
+    lines.push("- " + "Node.JS: " + process.versions.node);
+    lines.push("- " + "V8: " + process.versions.v8);
+    let cpus = os
+      .cpus()
+      .map(function(cpu) {
+        return cpu.model;
+      })
+      .reduce(function(o, model) {
+        if (!o[model]) o[model] = 0;
+        o[model]++;
+        return o;
+      }, {});
+    cpus = Object.keys(cpus)
+      .map(function(key) {
+        return key + " \u00d7 " + cpus[key];
+      })
+      .join("\n");
+    lines.push("  " + cpus);
+    return lines.join("\n");
   }
   add(subTitle, fn) {
     this.list.push({ subTitle, fn });
@@ -62,7 +87,10 @@ class Benchmark {
       const msg = `${a} | ${b} | ${c} | ${d}`;
       return msg;
     });
+
     console.log("");
+    console.log("-".repeat(process.stdout.columns || 80));
+    console.log(this.platformInfo());
     console.log("-".repeat(process.stdout.columns || 80));
     console.log(
       `${leftPad("time (s)", 10)} | ${leftPad("requests", 10)} | ${leftPad("rps", 10)} | test`.slice(
