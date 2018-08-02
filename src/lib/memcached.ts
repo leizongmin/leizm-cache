@@ -40,7 +40,7 @@ export class MemcachedStore implements CacheStore {
     });
   }
 
-  public async del(key: string): Promise<void> {
+  public async delete(key: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.client.delete(key, (err, ret) => {
         if (err) return reject(err);
@@ -49,7 +49,7 @@ export class MemcachedStore implements CacheStore {
     });
   }
 
-  public disconnect(): void {
+  public close(): void {
     this.client.close();
   }
 }

@@ -28,11 +28,11 @@ export class RedisStore implements CacheStore {
     return this.client.setex(key, ttl, data) as any;
   }
 
-  public async del(key: string): Promise<void> {
+  public async delete(key: string): Promise<void> {
     return this.client.del(key);
   }
 
-  public disconnect(): void {
+  public close(): void {
     this.client.disconnect();
   }
 }

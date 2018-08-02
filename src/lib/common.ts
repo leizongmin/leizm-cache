@@ -58,9 +58,34 @@ export class AsyncTask<T = any> {
 }
 
 export interface CacheStore {
+  /**
+   * 获取指定 key 的内容，返回 string
+   * @param key
+   */
   get(key: string): Promise<string | null>;
+
+  /**
+   * 获取指定 key 的内容，返回 Buffer
+   * @param key
+   */
   getBuffer(key: string): Promise<Buffer | null>;
+
+  /**
+   * 设置指定 key 的内容
+   * @param key
+   * @param ttl 过期时间，秒
+   * @param data 数据，支持 string 或者 buffer
+   */
   setex(key: string, ttl: number, data: string | Buffer): Promise<void>;
-  del(key: string): Promise<void>;
-  disconnect(): void;
+
+  /**
+   * 删除指定 key 的内容
+   * @param key
+   */
+  delete(key: string): Promise<void>;
+
+  /**
+   * 关闭连接
+   */
+  close(): void;
 }

@@ -114,7 +114,7 @@ export class Cache {
    * 删除缓存
    */
   public async delete(key: string): Promise<void> {
-    await this.store.del(key);
+    await this.store.delete(key);
   }
 
   /**
@@ -134,7 +134,7 @@ export class Cache {
    * 销毁
    */
   public destroy() {
-    this.store.disconnect();
+    this.store.close();
     this.pendingTask.clear();
   }
 }

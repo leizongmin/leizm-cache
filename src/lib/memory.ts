@@ -47,11 +47,11 @@ export class InMemoryStore implements CacheStore {
     this.data.set(key, { expire: ttl * 1000 + Date.now(), data: Buffer.isBuffer(data) ? data : Buffer.from(data) });
   }
 
-  public async del(key: string): Promise<void> {
+  public async delete(key: string): Promise<void> {
     this.data.delete(key);
   }
 
-  public disconnect(): void {
+  public close(): void {
     clearInterval(this.tid);
     this.data.clear();
   }
