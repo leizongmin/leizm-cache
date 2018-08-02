@@ -87,7 +87,7 @@ const data = await getData();
 
 - `new Cache({ ttl, redis?, encoder?, decoder? })` 创建缓存管理器实例：
   - `ttl` 默认缓存时间，秒
-  - `redis` Redis 连接配置，参考 [ioredis](https://www.npmjs.com/package/ioredis) 模块
+  - `redis` Redis 连接配置，参考 [ioredis](https://www.npmjs.com/package/ioredis) 模块 **推荐使用 Redis 存储**
   - `memcached` Memcached 连接配置，参考 [memjs](https://www.npmjs.com/package/memjs) 模块
   - `memory` 内存存储引擎配置 **如果没有配置其他数据库连接，默认使用此配置**
   - `encoder` 数据编码器，格式：`(data: any) => string | Buffer`，默认为 `JSON.stringify(data)`（**由于 JSON 解析器在数据长度大的时候性能较差，为提高性能需要定义自己的数据编码方式**）
