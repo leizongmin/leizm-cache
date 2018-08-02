@@ -76,9 +76,9 @@ async function main() {
   }
 
   let slist = [];
-  // slist = slist.concat(await createTests("Memcached", { memcached: { server: "127.0.0.1:11211" } }));
+  slist = slist.concat(await createTests("Memcached", { memcached: { server: "127.0.0.1:11211" } }));
   slist = slist.concat(await createTests("Redis", { redis: { db: 15 } }));
-  slist = slist.concat(await createTests("InMemoryStore", {}));
+  // slist = slist.concat(await createTests("InMemoryStore", {}));
 
   await benchmark.run();
 
