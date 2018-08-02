@@ -9,6 +9,8 @@
   ],
   "scripts": {
     "test": "mocha --project . --require ts-node/register --exit \"src/test/**/*.spec.ts\"",
+    "test-cov": "nyc --reporter=lcov mocha --require ts-node/register --exit \"src/test/**/*.spec.ts\" && nyc report",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "compile": "rm -rf dist && tsc",
     "prepublish": "npm run compile && npm test"
   },
@@ -30,7 +32,9 @@
     "@types/chai": "^4.1.4",
     "@types/mocha": "^5.2.5",
     "chai": "^4.1.2",
+    "coveralls": "^3.0.2",
     "mocha": "^5.2.0",
+    "nyc": "^12.0.2",
     "ts-node": "^7.0.0",
     "typescript": "^2.9.2"
   },
@@ -39,5 +43,13 @@
     "@types/node": "^10.5.4",
     "ioredis": "^3.2.2",
     "memjs": "^1.2.0"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ]
   }
 }
