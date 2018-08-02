@@ -1,3 +1,7 @@
+// Definitions by: Zongmin Lei <https://github.com/leizongmin>
+
+/// <reference types="node" />
+
 declare module "memjs" {
   export interface ClientOptions {
     /**
