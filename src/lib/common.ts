@@ -57,7 +57,7 @@ export class AsyncTask<T = any> {
   }
 }
 
-export interface RedisStore {
+export interface CacheStore {
   get(key: string): Promise<string | null>;
   getBuffer(key: string): Promise<Buffer | null>;
   setex(key: string, ttl: number, data: string | Buffer): Promise<void>;

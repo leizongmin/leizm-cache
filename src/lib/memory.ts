@@ -4,7 +4,7 @@
  * @author Zongmin Lei <leizongmin@gmail.com>
  */
 
-import { RedisStore } from "./common";
+import { CacheStore } from "./common";
 
 interface DataRow {
   expire: number;
@@ -16,7 +16,7 @@ export interface SimpleInMemoryRedisOptions {
   interval: number;
 }
 
-export class SimpleInMemoryRedis implements RedisStore {
+export class SimpleInMemoryRedis implements CacheStore {
   protected data: Map<string, DataRow> = new Map();
   protected tid: NodeJS.Timer;
 

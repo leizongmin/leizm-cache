@@ -4,7 +4,7 @@
  * @author Zongmin Lei <leizongmin@gmail.com>
  */
 
-import { Cache } from "../lib/cache";
+import { Cache, CacheOptions } from "../lib/cache";
 import { expect } from "chai";
 
 function getRandomKey() {
@@ -21,7 +21,7 @@ function sleep(ms = 0) {
   });
 }
 
-function generateTests(title: string, options: any) {
+function generateTests(title: string, options: Partial<CacheOptions>) {
   describe("测试 @leizm/cache " + title, function() {
     it("基本测试：get/set/delete", async function() {
       const ttl = 3;
@@ -292,3 +292,4 @@ function generateTests(title: string, options: any) {
 
 generateTests("使用Redis存储", { redis: { keyPrefix: "test:" } });
 generateTests("内存", {});
+generateTests("使用Memcached存储", { memcached: { server: "127.0.0.1:11211" } });

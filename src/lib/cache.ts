@@ -6,10 +6,11 @@
 
 import * as Redis from "ioredis";
 import { SimpleInMemoryRedis, SimpleInMemoryRedisOptions } from "./memory";
+import { MemcachedStore, MemcachedStoreOptions } from "./memcached";
 import {
   DataEncoder,
   DataDecoder,
-  RedisStore,
+  CacheStore,
   AsyncTask,
   CacheData,
   QueryOriginalContext,
@@ -25,6 +26,8 @@ export interface CacheOptions {
   redis?: Redis.RedisOptions;
   /** 内存存储引擎参数 */
   memory?: SimpleInMemoryRedisOptions;
+  /** Memcached连接信息 */
+  memcached?: MemcachedStoreOptions;
   /** 数据编码器 */
   encoder?: DataEncoder;
   /** 数据解码器 */
@@ -37,7 +40,7 @@ export interface CacheOptions {
  * 缓存管理器
  */
 export class Cache {
-  protected readonly redis: RedisStore;
+  protected readonly store: CacheStore;
   protected readonly pendingTask: Map<string, AsyncTask[]> = new Map();
   protected readonly encode: DataEncoder;
   protected readonly decode: DataDecoder;
@@ -45,9 +48,11 @@ export class Cache {
 
   constructor(public readonly options: CacheOptions) {
     if (options.redis) {
-      this.redis = new Redis(options.redis) as any;
+      this.store = new Redis(options.redis) as any;
+    } else if (options.memcached) {
+      this.store = new MemcachedStore(options.memcached);
     } else {
-      this.redis = new SimpleInMemoryRedis({ interval: 500, ...options.memory });
+      this.store = new SimpleInMemoryRedis({ interval: 500, ...options.memory });
     }
     this.encode = options.encoder || defaultEncoder;
     this.decode = options.decoder || defaultDecoder;
@@ -62,7 +67,7 @@ export class Cache {
     queryOriginal?: QueryOriginalFunction,
     ttl: number = this.options.ttl,
   ): Promise<CacheData> {
-    const current = await (this.decodeBuffer ? this.redis.getBuffer(key) : this.redis.get(key));
+    const current = await (this.decodeBuffer ? this.store.getBuffer(key) : this.store.get(key));
     if (current) return this.decode(current);
     if (!queryOriginal) return;
 
@@ -102,14 +107,14 @@ export class Cache {
    * 设置缓存
    */
   public async set(key: string, data: CacheData, ttl: number = this.options.ttl): Promise<void> {
-    await this.redis.setex(key, ttl, this.encode(data));
+    await this.store.setex(key, ttl, this.encode(data));
   }
 
   /**
    * 删除缓存
    */
   public async delete(key: string): Promise<void> {
-    await this.redis.del(key);
+    await this.store.del(key);
   }
 
   /**
@@ -129,7 +134,7 @@ export class Cache {
    * 销毁
    */
   public destroy() {
-    this.redis.disconnect();
+    this.store.disconnect();
     this.pendingTask.clear();
   }
 }

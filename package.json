@@ -8,7 +8,7 @@
     "dist/lib"
   ],
   "scripts": {
-    "test": "mocha --require ts-node/register --exit \"src/test/**/*.spec.ts\"",
+    "test": "mocha --project . --require ts-node/register --exit \"src/test/**/*.spec.ts\"",
     "compile": "rm -rf dist && tsc",
     "prepublish": "npm run compile && npm test"
   },
@@ -37,6 +37,7 @@
   "dependencies": {
     "@types/ioredis": "^3.2.13",
     "@types/node": "^10.5.4",
-    "ioredis": "^3.2.2"
+    "ioredis": "^3.2.2",
+    "memjs": "^1.2.0"
   }
 }

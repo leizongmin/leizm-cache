@@ -68,8 +68,9 @@ const data = await getData();
 
 - `new Cache({ ttl, redis?, encoder?, decoder? })` 创建缓存管理器实例：
   - `ttl` 默认缓存时间，秒
-  - `redis` Redis 连接配置，参考 [ioredis](https://www.npmjs.com/package/ioredis) 模块，**如果不提供此参数，则会默认使用内存存储**
-  - `memory` 内存存储引擎配置 **实验性**
+  - `redis` Redis 连接配置，参考 [ioredis](https://www.npmjs.com/package/ioredis) 模块
+  - `memcached` Memcached 连接配置，参考 [memjs](https://www.npmjs.com/package/memjs) 模块
+  - `memory` 内存存储引擎配置 **如果没有配置其他数据库连接，默认使用此配置**
   - `encoder` 数据编码器，格式：`(data: any) => string | Buffer`，默认为 `JSON.stringify(data)`（**由于 JSON 解析器在数据长度大的时候性能较差，为提高性能需要定义自己的数据编码方式**）
   - `decoder` 数据解码器，格式：`(data: string | Buffer) => any`，默认为 `JSON.parse(data.toString())`
   - `decodeBuffer` 传递给 `decoder` 的数据是否使用 Buffer 类型（默认为 string），**当使用自定义 decoder 时，为提高性能可考虑将此参数设置为 true（比如直接存储 gzip 数据流）**
