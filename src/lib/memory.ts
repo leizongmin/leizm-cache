@@ -11,16 +11,16 @@ interface DataRow {
   data: Buffer;
 }
 
-export interface SimpleInMemoryRedisOptions {
+export interface InMemoryStoreOptions {
   /** 自动清理过期数据的检查周期，毫秒 */
   interval: number;
 }
 
-export class SimpleInMemoryRedis implements CacheStore {
+export class InMemoryStore implements CacheStore {
   protected data: Map<string, DataRow> = new Map();
   protected tid: NodeJS.Timer;
 
-  constructor(protected readonly options: SimpleInMemoryRedisOptions) {
+  constructor(protected readonly options: InMemoryStoreOptions) {
     this.tid = setInterval(() => {
       const now = Date.now();
       this.data.forEach((v, k) => {

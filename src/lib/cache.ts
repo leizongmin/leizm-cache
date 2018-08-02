@@ -4,9 +4,9 @@
  * @author Zongmin Lei <leizongmin@gmail.com>
  */
 
-import * as Redis from "ioredis";
-import { SimpleInMemoryRedis, SimpleInMemoryRedisOptions } from "./memory";
+import { InMemoryStore, InMemoryStoreOptions } from "./memory";
 import { MemcachedStore, MemcachedStoreOptions } from "./memcached";
+import { RedisStore, RedisStoreOptions } from "./redis";
 import {
   DataEncoder,
   DataDecoder,
@@ -23,9 +23,9 @@ export interface CacheOptions {
   /** 缓存时间，单位：秒 */
   ttl: number;
   /** Redis连接信息 */
-  redis?: Redis.RedisOptions;
+  redis?: RedisStoreOptions;
   /** 内存存储引擎参数 */
-  memory?: SimpleInMemoryRedisOptions;
+  memory?: InMemoryStoreOptions;
   /** Memcached连接信息 */
   memcached?: MemcachedStoreOptions;
   /** 数据编码器 */
@@ -48,11 +48,11 @@ export class Cache {
 
   constructor(public readonly options: CacheOptions) {
     if (options.redis) {
-      this.store = new Redis(options.redis) as any;
+      this.store = new RedisStore(options.redis);
     } else if (options.memcached) {
       this.store = new MemcachedStore(options.memcached);
     } else {
-      this.store = new SimpleInMemoryRedis({ interval: 500, ...options.memory });
+      this.store = new InMemoryStore({ interval: 500, ...options.memory });
     }
     this.encode = options.encoder || defaultEncoder;
     this.decode = options.decoder || defaultDecoder;

@@ -18,7 +18,7 @@ export class MemcachedStore implements CacheStore {
     this.client = memjs.Client.create(options.server, { ...(options as any) });
   }
 
-  public async get(key: string): Promise<string | null> {
+  public get(key: string): Promise<string | null> {
     return this.getBuffer(key).then(ret => (ret ? ret.toString() : null));
   }
 
