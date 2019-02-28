@@ -39,7 +39,7 @@
     "typescript": "^3.0.1"
   },
   "dependencies": {
-    "@types/ioredis": "^3.2.13",
+    "@types/ioredis": "^4.0.9",
     "@types/node": "^10.5.4",
     "ioredis": "^3.2.2",
     "memjs": "^1.2.0"
