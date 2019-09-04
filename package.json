@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/leizongmin/leizm-cache#readme",
   "devDependencies": {
-    "@types/chai": "^4.1.4",
+    "@types/chai": "^4.2.1",
     "@types/mocha": "^5.2.5",
     "chai": "^4.1.2",
     "coveralls": "^3.0.2",
