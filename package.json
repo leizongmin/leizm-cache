@@ -41,7 +41,7 @@
   "dependencies": {
     "@types/ioredis": "^3.2.13",
     "@types/node": "^10.5.4",
-    "ioredis": "^3.2.2",
+    "ioredis": "^4.14.1",
     "memjs": "^1.2.0"
   },
   "nyc": {
